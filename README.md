@@ -1,2 +1,4 @@
-# zipper
-Handle file zipping for DataMap
+# Zipper
+![ziper](resources/zipper.jpg)
+
+Handle file zipping for DataMap.
