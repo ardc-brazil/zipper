@@ -1,0 +1,6 @@
+*
+!app
+!requirements.txt
+!infrastructure
+!config.py
+!config_prod.py
