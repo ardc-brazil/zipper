@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask_restx import Api
-from app.controllers.v1.zipper import namespace as zipper_namespace
+from app.controllers.v1.zipper.zipper import namespace
 
 api = Blueprint("apiv1", __name__, url_prefix="/api/v1")
 
@@ -12,4 +12,4 @@ api_extension = Api(
     doc="/docs",
 )
 
-api_extension.add_namespace(zipper_namespace)
+api_extension.add_namespace(namespace)

@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 
-namespace = Namespace("zipper", description="Zipper API")
+namespace = Namespace("datasets", "Dataset zip operations")
 
 zip_request_model = namespace.model(
     "ZipRequestModel",
@@ -11,11 +11,11 @@ zip_request_model = namespace.model(
     },
 )
 
-
+@namespace.route("/<string:dataset_id>/versions/<string:name>/zip")
 class ZipperController(Resource):
+    
     # POST /api/v1/datasets/:dataset_id/versions/:name/zip
     @namespace.doc("Zip dataset files")
     @namespace.expect(zip_request_model, validate=True)
-    @namespace.route("/zip")
-    def post(self):
-        pass
+    def post(self, dataset_id, name):
+        return 200, {}
