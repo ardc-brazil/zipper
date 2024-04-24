@@ -5,7 +5,7 @@ def create_app():
     app = Flask(__name__)
 
     # Load app configuration
-    app.config.from_prefixed_env("GATEKEEPER")
+    app.config.from_prefixed_env("ZIPPER")
 
     # remove trailing slash in the api
     app.url_map.strict_slashes = False
