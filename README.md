@@ -37,9 +37,33 @@ volume to persistently storage data.
 make ENV={env} python-run
 ```
 
-### Running tests
+### Unit tests
 
-Run `pytest`. This will execute all unit tests within `./tests` with the prefix `test_*.py`.
+We are using [unittest](https://docs.python.org/3/library/unittest.html). See examples at https://docs.python.org/3/library/unittest.html
+
+To run all tests from command line, use:
+
+```sh
+python -m unittest discover -p "*_test.py"
+```
+
+or:
+
+```sh
+make ENV=local python-test
+```
+
+To generage the code coverage reports, use:
+```sh
+# Run the tests and generage the .coverage file
+coverage run -m unittest discover -p "*_test.py"
+
+# Print the coverage report on console
+coverage report
+
+# Generate the coverage report in html
+coverage html
+```
 
 ### Deploying
 
