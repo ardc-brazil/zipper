@@ -62,3 +62,6 @@ python-pip-freeze:
 python-run:
 	flask routes
 	FLASK_ENV=development FLASK_DEBUG=1 flask run -h localhost -p 9092
+
+python-test:
+	python -m unittest discover -p "*_test.py"
