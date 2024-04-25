@@ -16,6 +16,9 @@ class ZipperService:
     def zip_files(
         self, bucket: str, file_names: list[str], zip_name: str | None = None
     ) -> ZippedResource:
+        if not file_names:
+            return ZippedResource(success=False)
+        
         if not zip_name:
             zip_name = f"{uuid.uuid4()}.zip"
 

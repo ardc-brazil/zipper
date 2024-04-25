@@ -88,3 +88,52 @@ class Zipper_Tests(unittest.TestCase):
         self.assertEqual(result.success, False)
         self.assertIsNone(result.bucket)
         self.assertIsNone(result.name)
+
+    def test_zip_files_no_files(self):
+        # given
+        minio_client = MagicMock()
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = "bucket"
+        file_names = []
+
+        # when
+        result = zipper.zip_files(bucket, file_names)
+
+        # then
+        self.assertEqual(result.success, False)
+        self.assertIsNone(result.bucket)
+        self.assertIsNone(result.name)
+    
+    def test_zip_files_no_bucket(self):
+        # given
+        minio_client = MagicMock()
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = ""
+        file_names = ["file1", "file2"]
+
+        # when
+        result = zipper.zip_files(bucket, file_names)
+
+        # then
+        self.assertEqual(result.success, False)
+        self.assertIsNone(result.bucket)
+        self.assertIsNone(result.name)
+    
+    def test_zip_files_no_zip_extension(self):
+        # given
+        minio_client = MagicMock()
+        minio_client.get_object.return_value = MockResponse()
+        minio_client.fput_object = MagicMock()
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = "bucket"
+        file_names = ["file1", "file2"]
+        zip_name = "tmp"
+
+        # when
+        result = zipper.zip_files(bucket, file_names, zip_name)
+
+        # then
+        self.assertIn(".zip", result.name)
+        self.assertEqual(result.success, True)
+        self.assertEqual(result.bucket, bucket)
+        self.assertEqual(result.name, zip_name + ".zip")
