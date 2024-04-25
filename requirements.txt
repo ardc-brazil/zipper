@@ -7,6 +7,7 @@ click==8.1.7
 coverage==7.4.4
 Flask==2.3.2
 flask-restx==1.1.0
+gunicorn==21.2.0
 idna==3.7
 itsdangerous==2.2.0
 Jinja2==3.1.3
