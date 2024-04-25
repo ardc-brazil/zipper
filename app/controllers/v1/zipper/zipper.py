@@ -30,7 +30,6 @@ zip_response_model = namespace.model(
 
 @namespace.route("/zip")
 class ZipperController(Resource):
-
     # POST /api/v1/zip
     @namespace.doc("Zip dataset files")
     @namespace.expect(zip_request_model, validate=True)
@@ -43,8 +42,14 @@ class ZipperController(Resource):
             access_key=app.config["MINIO_ACCESS_KEY"],
             secret_key=app.config["MINIO_SECRET_KEY"],
         )
-        service = ZipperService(minio_client=_minio_client, temp_dir=app.config["TEMP_DIR"])
-        zipped_resource = service.zip_files(bucket=payload["bucket"], file_names=payload["files"], zip_name=payload["zip_name"])
+        service = ZipperService(
+            minio_client=_minio_client, temp_dir=app.config["TEMP_DIR"]
+        )
+        zipped_resource = service.zip_files(
+            bucket=payload["bucket"],
+            file_names=payload["files"],
+            zip_name=payload["zip_name"],
+        )
 
         if not zipped_resource.success:
             return {"success": False, "message": "Failed to zip files"}, 500

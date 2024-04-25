@@ -15,7 +15,7 @@ class MockResponse:
 
     def read(self):
         return b"file content"
-    
+
     def getheader(self, header):
         return "header value"
 
