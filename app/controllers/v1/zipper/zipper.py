@@ -1,20 +1,23 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
+from app.factory.minio_factory import MINIOFactory
 from app.services.zipper import ZipperService
 from flask import current_app as app
 
 namespace = Namespace("datasets", "Dataset zip operations")
 service = ZipperService(
-    app.config["MINIO_HOST"],
-    app.config["MINIO_ACCESS_KEY"],
-    app.config["MINIO_SECRET_KEY"],
-    app.config["TEMP_DIR"],
+    minio_client=MINIOFactory().create_minio_client(
+        app.config["MINIO_HOST"],
+        app.config["MINIO_ACCESS_KEY"],
+        app.config["MINIO_SECRET_KEY"],
+    ),
+    temp_dir=app.config["TEMP_DIR"],
 )
 
 zip_request_model = namespace.model(
     "ZipRequestModel",
     {
-        "zip_name": fields.String(required=True, description="Zip file name"),
+        "zip_name": fields.String(required=False, description="Zip file name"),
         "files": fields.List(
             fields.String, required=True, description="List of file names"
         ),
