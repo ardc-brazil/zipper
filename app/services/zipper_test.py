@@ -15,6 +15,9 @@ class MockResponse:
 
     def read(self):
         return b"file content"
+    
+    def getheader(self, header):
+        return "header value"
 
 
 class Zipper_Tests(unittest.TestCase):
@@ -38,8 +41,8 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names, zip_name)
 
         # then
-        minio_client.get_object.assert_any_call(bucket, "file1")
-        minio_client.get_object.assert_any_call(bucket, "file2")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
         self.assertIn(self.test_dir, minio_client.fput_object.call_args[0][2])
         self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
         self.assertEqual(f"{zip_name}", minio_client.fput_object.call_args[0][1])
@@ -60,8 +63,8 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names)
 
         # then
-        minio_client.get_object.assert_any_call(bucket, "file1")
-        minio_client.get_object.assert_any_call(bucket, "file2")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
         self.assertIn(self.test_dir, minio_client.fput_object.call_args[0][2])
         self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
         self.assertEqual(result.success, True)

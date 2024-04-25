@@ -22,6 +22,9 @@ class ZipperService:
         if ".zip" not in zip_name:
             zip_name = f"{zip_name}.zip"
 
+        if not os.path.exists(self._temp_dir):
+            os.makedirs(self._temp_dir)
+
         temp_zip_file = tempfile.NamedTemporaryFile(
             dir=self._temp_dir, delete=False
         )
@@ -29,8 +32,8 @@ class ZipperService:
         try:
             with zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED) as zipf:
                 for file in file_names:
-                    with self._minio_client.get_object(bucket, file) as obj:
-                        zipf.writestr(os.path.basename(file), obj.read())
+                    with self._minio_client.get_object(bucket_name=bucket, object_name=file) as obj:
+                        zipf.writestr(os.path.basename(obj.getheader("x-amz-meta-filename")), obj.read())
 
             self._minio_client.fput_object(bucket, zip_name, temp_zip_file.name)
         except Exception as e:
