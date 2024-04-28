@@ -18,4 +18,4 @@ RUN apk --no-cache add libpq
 WORKDIR /app
 EXPOSE 9093
 
-CMD ["uvicorn", "app:create_app", "--host", "0.0.0.0", "--port", "9093"]
+CMD ["uvicorn", "app:create_app", "--host", "0.0.0.0", "--port", "9093", "--workers", "3"]
