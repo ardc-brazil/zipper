@@ -1,17 +1,21 @@
-from flask import Flask
+from fastapi import FastAPI
+
+from app.containers import Container
+from app.controllers.v1.zipper import router
 
 
 def create_app():
-    app = Flask(__name__)
+    container = Container()
 
-    # Load app configuration
-    app.config.from_prefixed_env("ZIPPER")
+    app = FastAPI(
+        title="Zipper API",
+        description="Zipper API is a simple API to zip MINIO dataset files",
+        version="0.0.1",
+        redirect_slashes=True,
+        root_path="/api",
+    )
 
-    # remove trailing slash in the api
-    app.url_map.strict_slashes = False
-
-    from app.controllers.v1 import api
-
-    app.register_blueprint(api)
+    app.container = container
+    app.include_router(router, prefix="/v1")
 
     return app

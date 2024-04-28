@@ -103,7 +103,7 @@ class Zipper_Tests(unittest.TestCase):
         self.assertEqual(result.success, False)
         self.assertIsNone(result.bucket)
         self.assertIsNone(result.name)
-    
+
     def test_zip_files_no_bucket(self):
         # given
         minio_client = MagicMock()
@@ -118,7 +118,7 @@ class Zipper_Tests(unittest.TestCase):
         self.assertEqual(result.success, False)
         self.assertIsNone(result.bucket)
         self.assertIsNone(result.name)
-    
+
     def test_zip_files_no_zip_extension(self):
         # given
         minio_client = MagicMock()

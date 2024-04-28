@@ -2,22 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Flask",
+            "name": "Python Debugger: FastAPI",
             "type": "debugpy",
             "request": "launch",
-            "module": "flask",
-            "envFile": "${workspaceFolder}/local.env",
-            "env": {
-                "FLASK_DEBUG": "1",
-                "FLASK_ENV": "development"
-            },
-            "args": [
-                "run",
-                "-h", "localhost",
-                "-p", "9093",
-                "--no-debugger",
-                "--no-reload"
-            ]
+            "program": "app.py",
+            "console": "integratedTerminal"
         }
     ]
 }

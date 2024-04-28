@@ -60,8 +60,7 @@ python-pip-freeze:
 	pip freeze > requirements.txt
 
 python-run:
-	flask routes
-	FLASK_ENV=development FLASK_DEBUG=1 flask run -h localhost -p 9092
+	uvicorn app:create_app --host 0.0.0.0 --port 9093
 
 python-test:
 	python -m unittest discover -p "*_test.py"

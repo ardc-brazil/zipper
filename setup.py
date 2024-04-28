@@ -9,13 +9,11 @@ setup(
     url="https://github.com/ardc-brazil/zipper",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        "Flask>=2.0.0",
-    ],
+    install_requires=[],
     classifiers=[
         "Development Status :: 1 - Beta",
         "Environment :: Web Environment",
-        "Framework :: Flask",
+        "Framework :: FastAPI",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
