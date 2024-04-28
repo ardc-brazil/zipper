@@ -7,6 +7,7 @@ from app.services.zipper import ZipperService
 
 logger = logging.getLogger("uvicorn")
 
+
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=["app.controllers.v1.zipper"]
