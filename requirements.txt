@@ -1,6 +1,5 @@
 bcrypt==4.0.1
 dependency-injector==4.41.0
-deptry==0.16.1
 fastapi==0.110.2
 httptools==0.6.1
 importlib-metadata==6.8.0

@@ -27,6 +27,12 @@ On_Cyan=\033[46m        # Cyan
 On_White=\033[47m       # White
 
 # Docker commands
+docker-env-ignore:
+	echo "!${ENV}_config.yml" >> .dockerignore
+
+docker-env-ignore-undo:
+	sed -i '' '/!${ENV}_config.yml/d' .dockerignore
+
 docker-build:
 	time docker-compose build
 
@@ -46,7 +52,7 @@ docker-down:
 	@echo "${On_Green}Downing docker containers${Color_Off}"
 	time docker compose down
 
-docker-deployment: docker-build docker-stop docker-down docker-run
+docker-deployment: docker-env-ignore docker-build docker-env-ignore-undo docker-stop docker-down docker-run
 	
 # Python commands
 python-env:

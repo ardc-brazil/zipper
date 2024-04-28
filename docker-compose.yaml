@@ -2,12 +2,15 @@ version: '3'
 
 services:
   zipper:
-    build: .
+    build: 
+      context: .
+      args:
+        ENV: ${ENV}
     image: zipper
     container_name: datamap_zipper
     restart: always
     env_file:
-      - ${ENV_FILE_PATH}
+      - ${ENV}.env
     ports: 
       - '9093:9093'
     networks:
