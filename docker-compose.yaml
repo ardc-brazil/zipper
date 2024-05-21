@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  zipper:
+    build: 
+      context: .
+      args:
+        ENV: ${ENV}
+    image: zipper
+    container_name: datamap_zipper
+    restart: always
+    env_file:
+      - ${ENV}.env
+    ports: 
+      - '9093:9093'
+    networks:
+      - gatekeeper_gatekeeper-network
+
+networks:
+  gatekeeper_gatekeeper-network:
+    driver: bridge
+    name: gatekeeper_gatekeeper-network

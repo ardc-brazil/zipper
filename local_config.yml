@@ -1,0 +1,6 @@
+minio:
+  host: localhost:9000
+  access_key: vmI02fswfhdHP1mmoASs
+  secret_key: NhZqdCsEDS6gLwcYXU6B48w244H7IA0GbYOoXWaC
+
+temp_dir: ../tmp_zip
