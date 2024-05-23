@@ -42,6 +42,7 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names, zip_name)
 
         # then
+        self.assertTrue(isinstance(result.id, uuid.UUID))
         self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertEqual(result.name, zip_name)
@@ -60,6 +61,7 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names)
 
         # then
+        self.assertTrue(isinstance(result.id, uuid.UUID))
         self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertTrue(result.name.endswith(".zip"))
@@ -78,6 +80,7 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names)
 
         # then
+        self.assertTrue(isinstance(result.id, uuid.UUID))
         self.assertEqual(result.status, ZipStatus.FAILURE)
         self.assertIsNone(result.bucket)
         self.assertIsNone(result.name)
@@ -95,6 +98,7 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names, zip_name)
 
         # then
+        self.assertTrue(isinstance(result.id, uuid.UUID))
         self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertEqual(result.name, zip_name + ".zip")
@@ -110,9 +114,10 @@ class Zipper_Tests(unittest.TestCase):
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
+        process_id = uuid.uuid4()
 
         # when
-        zipper._zip_files(bucket, file_names, zip_name)
+        zipper._zip_files(process_id, bucket, file_names, zip_name)
 
         # then
         minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
@@ -130,13 +135,14 @@ class Zipper_Tests(unittest.TestCase):
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
+        process_id = uuid.uuid4()
 
         # when
         with self.assertLogs("uvicorn", level="ERROR") as cm:
-            zipper._zip_files(bucket, file_names, zip_name)
+            zipper._zip_files(process_id, bucket, file_names, zip_name)
 
         # then
-        self.assertIn("ERROR:uvicorn:Failed to zip files:", cm.output[0])
+        self.assertIn(f"ERROR:uvicorn:Failed to zip files for process id {process_id}:", cm.output[0])
         minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
         minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
 
@@ -149,9 +155,10 @@ class Zipper_Tests(unittest.TestCase):
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
+        process_id = uuid.uuid4()
 
         # when
-        zipper._zip_files(bucket, file_names, zip_name)
+        zipper._zip_files(process_id, bucket, file_names, zip_name)
 
         # then
         temp_files = os.listdir(self.test_dir)

@@ -16,7 +16,9 @@ class ZipperService:
         self._minio_client = minio_client
         self._temp_dir = temp_dir
 
-    def _zip_files(self, bucket: str, file_names: list[str], zip_name: str):
+    def _zip_files(self, id: uuid.UUID, bucket: str, file_names: list[str], zip_name: str):
+        logger.info(f"Zipping files: {file_names} to {zip_name} in bucket {bucket} with process ID {id}")
+
         if not os.path.exists(self._temp_dir):
             os.makedirs(self._temp_dir)
 
@@ -38,17 +40,20 @@ class ZipperService:
             self._minio_client.fput_object(bucket, zip_name, temp_zip_file.name)
             logger.info(f"Zipped files to {zip_name} in bucket {bucket}")
         except Exception as e:
-            logger.error(f"Failed to zip files: {e}")
+            logger.error(f"Failed to zip files for process id {id}: {e}")
         finally:
             logger.info(f"Removing temporary zip file: {temp_zip_file.name}")
             os.remove(temp_zip_file.name)
+            logger.info(f"Finished zipping files for process id {id}")
             # TODO call gatekeeper to notify status
 
     def zip_files(
         self, bucket: str, file_names: list[str], zip_name: str | None = None
     ) -> ZippedResource:
+        process_id = uuid.uuid4()
+
         if not file_names:
-            return ZippedResource(status=ZipStatus.FAILURE)
+            return ZippedResource(id=process_id, status=ZipStatus.FAILURE)
         
         if not zip_name:
             zip_name = f"{uuid.uuid4()}.zip"
@@ -56,6 +61,6 @@ class ZipperService:
         if ".zip" not in zip_name:
             zip_name = f"{zip_name}.zip"
 
-        threading.Thread(target=self._zip_files, args=(bucket, file_names, zip_name)).start()
+        threading.Thread(target=self._zip_files, args=(process_id, bucket, file_names, zip_name)).start()
 
-        return ZippedResource(status=ZipStatus.IN_PROGRESS, bucket=bucket, name=zip_name)
+        return ZippedResource(id=process_id, status=ZipStatus.IN_PROGRESS, bucket=bucket, name=zip_name)
