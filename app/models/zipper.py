@@ -11,6 +11,8 @@ class ZippedResource:
         self, 
         id: UUID,
         status: ZipStatus,
+        dataset_id: UUID,
+        version: str,
         bucket: str | None = None, 
         name: str | None = None
     ):
@@ -18,3 +20,5 @@ class ZippedResource:
         self.bucket = bucket
         self.name = name
         self.status = status
+        self.dataset_id = dataset_id
+        self.version = version

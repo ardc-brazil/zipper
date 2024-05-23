@@ -7,7 +7,6 @@ from app.models.zipper import ZipStatus
 from app.services.zipper import ZipperService
 
 router = APIRouter(
-    prefix="/zip",
     tags=["zip"],
     dependencies=[],
     responses={
@@ -17,32 +16,39 @@ router = APIRouter(
 )
 
 
-# POST /api/v1/zip
+# POST /api/v1/datasets/:dataset_id/version/:version/zip
 @router.post(
-    path="/",
+    path="/datasets/{dataset_id}/versions/{version}/zip",
     status_code=201,
     description="Zip dataset files",
     response_model_exclude_none=True,
 )
 @inject
 def zip(
+    dataset_id: str,
+    version: str,
     payload: CreateZipRequest,
     response: Response,
     service: ZipperService = Depends(Provide[Container.zipper_service]),
 ) -> CreateZipResponse:
     zipped_resource = service.zip_files(
-        bucket=payload.bucket, file_names=payload.files, zip_name=payload.zip_name
+        dataset_id=dataset_id,
+        version=version,
+        bucket=payload.bucket, 
+        file_names=payload.files, 
+        zip_name=payload.zip_name
     )
 
     if zipped_resource.status == ZipStatus.FAILURE:
         response.status_code = 500
         return CreateZipResponse(
+            id=zipped_resource.id,
             status=zipped_resource.status.name,
             message="Failed to zip files",
         )
 
     return CreateZipResponse(
-        bucket=zipped_resource.bucket,
+        id=zipped_resource.id,
         name=zipped_resource.name,
         status=zipped_resource.status.name,
     )
