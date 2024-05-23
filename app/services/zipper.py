@@ -1,11 +1,12 @@
 import logging
 import os
 import tempfile
+import threading
 import zipfile
 from minio import Minio
 import uuid
 
-from app.models.zipper import ZippedResource
+from app.models.zipper import ZipStatus, ZippedResource
 
 logger = logging.getLogger("uvicorn")
 
@@ -15,18 +16,7 @@ class ZipperService:
         self._minio_client = minio_client
         self._temp_dir = temp_dir
 
-    def zip_files(
-        self, bucket: str, file_names: list[str], zip_name: str | None = None
-    ) -> ZippedResource:
-        if not file_names:
-            return ZippedResource(success=False)
-
-        if not zip_name:
-            zip_name = f"{uuid.uuid4()}.zip"
-
-        if ".zip" not in zip_name:
-            zip_name = f"{zip_name}.zip"
-
+    def _zip_files(self, bucket: str, file_names: list[str], zip_name: str):
         if not os.path.exists(self._temp_dir):
             os.makedirs(self._temp_dir)
 
@@ -49,9 +39,23 @@ class ZipperService:
             logger.info(f"Zipped files to {zip_name} in bucket {bucket}")
         except Exception as e:
             logger.error(f"Failed to zip files: {e}")
-            return ZippedResource(success=False)
         finally:
             logger.info(f"Removing temporary zip file: {temp_zip_file.name}")
             os.remove(temp_zip_file.name)
+            # TODO call gatekeeper to notify status
 
-        return ZippedResource(success=True, bucket=bucket, name=zip_name)
+    def zip_files(
+        self, bucket: str, file_names: list[str], zip_name: str | None = None
+    ) -> ZippedResource:
+        if not file_names:
+            return ZippedResource(status=ZipStatus.FAILURE)
+        
+        if not zip_name:
+            zip_name = f"{uuid.uuid4()}.zip"
+
+        if ".zip" not in zip_name:
+            zip_name = f"{zip_name}.zip"
+
+        threading.Thread(target=self._zip_files, args=(bucket, file_names, zip_name)).start()
+
+        return ZippedResource(status=ZipStatus.IN_PROGRESS, bucket=bucket, name=zip_name)

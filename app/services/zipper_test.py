@@ -1,8 +1,10 @@
+import os
 import shutil
 import tempfile
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import uuid
+from app.models.zipper import ZipStatus
 from app.services.zipper import ZipperService
 
 
@@ -26,12 +28,11 @@ class Zipper_Tests(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.test_dir)
-
-    def test_zip_files(self):
+    
+    @patch("app.services.zipper.threading.Thread")
+    def test_zip_files(self, MockThread):
         # given
         minio_client = MagicMock()
-        minio_client.get_object.return_value = MockResponse()
-        minio_client.fput_object = MagicMock()
         zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
         bucket = "bucket"
         file_names = ["file1", "file2"]
@@ -41,20 +42,16 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names, zip_name)
 
         # then
-        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
-        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
-        self.assertIn(self.test_dir, minio_client.fput_object.call_args[0][2])
-        self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
-        self.assertEqual(f"{zip_name}", minio_client.fput_object.call_args[0][1])
-        self.assertEqual(result.success, True)
+        self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertEqual(result.name, zip_name)
+        MockThread.assert_called_once()
+        MockThread.return_value.start.assert_called_once()
 
-    def test_zip_files_no_zip_name(self):
+    @patch("app.services.zipper.threading.Thread")
+    def test_zip_files_no_zip_name(self, MockThread):
         # given
         minio_client = MagicMock()
-        minio_client.get_object.return_value = MockResponse()
-        minio_client.fput_object = MagicMock()
         zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
         bucket = "bucket"
         file_names = ["file1", "file2"]
@@ -63,32 +60,13 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names)
 
         # then
-        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
-        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
-        self.assertIn(self.test_dir, minio_client.fput_object.call_args[0][2])
-        self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
-        self.assertEqual(result.success, True)
+        self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertTrue(result.name.endswith(".zip"))
         self.assertEqual(4, uuid.UUID(result.name.split(".zip")[0]).version)
-
-    def test_zip_files_exception(self):
-        # given
-        minio_client = MagicMock()
-        minio_client.get_object.return_value = MockResponse()
-        minio_client.fput_object.side_effect = Exception("error")
-        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
-        bucket = "bucket"
-        file_names = ["file1", "file2"]
-
-        # when
-        result = zipper.zip_files(bucket, file_names)
-
-        # then
-        self.assertEqual(result.success, False)
-        self.assertIsNone(result.bucket)
-        self.assertIsNone(result.name)
-
+        MockThread.assert_called_once()
+        MockThread.return_value.start.assert_called_once()
+    
     def test_zip_files_no_files(self):
         # given
         minio_client = MagicMock()
@@ -100,30 +78,14 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names)
 
         # then
-        self.assertEqual(result.success, False)
+        self.assertEqual(result.status, ZipStatus.FAILURE)
         self.assertIsNone(result.bucket)
         self.assertIsNone(result.name)
 
-    def test_zip_files_no_bucket(self):
+    @patch("app.services.zipper.threading.Thread")
+    def test_zip_files_no_zip_extension(self, MockThread):
         # given
         minio_client = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
-        bucket = ""
-        file_names = ["file1", "file2"]
-
-        # when
-        result = zipper.zip_files(bucket, file_names)
-
-        # then
-        self.assertEqual(result.success, False)
-        self.assertIsNone(result.bucket)
-        self.assertIsNone(result.name)
-
-    def test_zip_files_no_zip_extension(self):
-        # given
-        minio_client = MagicMock()
-        minio_client.get_object.return_value = MockResponse()
-        minio_client.fput_object = MagicMock()
         zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
         bucket = "bucket"
         file_names = ["file1", "file2"]
@@ -133,7 +95,64 @@ class Zipper_Tests(unittest.TestCase):
         result = zipper.zip_files(bucket, file_names, zip_name)
 
         # then
-        self.assertIn(".zip", result.name)
-        self.assertEqual(result.success, True)
+        self.assertEqual(result.status, ZipStatus.IN_PROGRESS)
         self.assertEqual(result.bucket, bucket)
         self.assertEqual(result.name, zip_name + ".zip")
+        MockThread.assert_called_once()
+        MockThread.return_value.start.assert_called_once()
+
+    def test__zip_files(self):
+        # given
+        minio_client = MagicMock()
+        minio_client.get_object.return_value = MockResponse()
+        minio_client.fput_object = MagicMock()
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = "bucket"
+        file_names = ["file1", "file2"]
+        zip_name = "tmp.zip"
+
+        # when
+        zipper._zip_files(bucket, file_names, zip_name)
+
+        # then
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
+        self.assertIn(self.test_dir, minio_client.fput_object.call_args[0][2])
+        self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
+        self.assertEqual(f"{zip_name}", minio_client.fput_object.call_args[0][1])
+
+    def test__zip_files_exception(self):
+        # given
+        minio_client = MagicMock()
+        minio_client.get_object.return_value = MockResponse()
+        minio_client.fput_object.side_effect = Exception("error")
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = "bucket"
+        file_names = ["file1", "file2"]
+        zip_name = "tmp.zip"
+
+        # when
+        with self.assertLogs("uvicorn", level="ERROR") as cm:
+            zipper._zip_files(bucket, file_names, zip_name)
+
+        # then
+        self.assertIn("ERROR:uvicorn:Failed to zip files:", cm.output[0])
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
+        minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
+
+    def test__zip_files_tempfile_cleanup(self):
+        # given
+        minio_client = MagicMock()
+        minio_client.get_object.return_value = MockResponse()
+        minio_client.fput_object = MagicMock()
+        zipper = ZipperService(minio_client=minio_client, temp_dir=self.test_dir)
+        bucket = "bucket"
+        file_names = ["file1", "file2"]
+        zip_name = "tmp.zip"
+
+        # when
+        zipper._zip_files(bucket, file_names, zip_name)
+
+        # then
+        temp_files = os.listdir(self.test_dir)
+        self.assertNotIn(zip_name, temp_files)  # Ensure temp file is removed

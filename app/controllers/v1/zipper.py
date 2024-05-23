@@ -3,6 +3,7 @@ from dependency_injector.wiring import inject, Provide
 
 from app.containers import Container
 from app.controllers.v1.resources import CreateZipRequest, CreateZipResponse
+from app.models.zipper import ZipStatus
 from app.services.zipper import ZipperService
 
 router = APIRouter(
@@ -33,15 +34,15 @@ def zip(
         bucket=payload.bucket, file_names=payload.files, zip_name=payload.zip_name
     )
 
-    if not zipped_resource.success:
+    if zipped_resource.status == ZipStatus.FAILURE:
         response.status_code = 500
         return CreateZipResponse(
-            success=False,
+            status=zipped_resource.status.name,
             message="Failed to zip files",
         )
 
     return CreateZipResponse(
-        success=True,
         bucket=zipped_resource.bucket,
         name=zipped_resource.name,
+        status=zipped_resource.status.name,
     )
