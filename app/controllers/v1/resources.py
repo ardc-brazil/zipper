@@ -10,6 +10,6 @@ class CreateZipRequest(BaseModel):
 
 class CreateZipResponse(BaseModel):
     id: UUID = Field(..., description="Zip process ID")
+    status: str = Field(..., description="Zip file status")
     message: str | None = Field(None, description="Error message")
     name: str | None = Field(None, description="Zip file name")
-    status: str | None = Field(None, description="Zip file status")

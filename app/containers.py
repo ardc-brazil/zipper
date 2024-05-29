@@ -30,6 +30,8 @@ class Container(containers.DeclarativeContainer):
     gatekeeper_gateway = providers.Factory(
         GatekeeperGateway,
         base_url=config.gatekeeper.base_url,
+        api_key=config.gatekeeper.api_key,
+        api_secret=config.gatekeeper.api_secret,
     )
 
     zipper_service = providers.Factory(

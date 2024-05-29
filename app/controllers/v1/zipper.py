@@ -15,8 +15,7 @@ router = APIRouter(
     },
 )
 
-
-# POST /api/v1/datasets/:dataset_id/version/:version/zip
+# POST /api/v1/datasets/:dataset_id/versions/:version/zip
 @router.post(
     path="/datasets/{dataset_id}/versions/{version}/zip",
     status_code=201,
