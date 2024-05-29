@@ -15,6 +15,7 @@ router = APIRouter(
     },
 )
 
+
 # POST /api/v1/datasets/:dataset_id/versions/:version/zip
 @router.post(
     path="/datasets/{dataset_id}/versions/{version}/zip",
@@ -33,9 +34,9 @@ def zip(
     zipped_resource = service.zip_files(
         dataset_id=dataset_id,
         version=version,
-        bucket=payload.bucket, 
-        file_names=payload.files, 
-        zip_name=payload.zip_name
+        bucket=payload.bucket,
+        file_names=payload.files,
+        zip_name=payload.zip_name,
     )
 
     if zipped_resource.status == ZipStatus.FAILURE:

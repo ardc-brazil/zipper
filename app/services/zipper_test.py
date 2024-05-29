@@ -28,13 +28,17 @@ class Zipper_Tests(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.test_dir)
-    
+
     @patch("app.services.zipper.threading.Thread")
     def test_zip_files(self, MockThread):
         # given
         minio_client = MagicMock()
         gatekeeper_gateway = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
@@ -59,7 +63,11 @@ class Zipper_Tests(unittest.TestCase):
         # given
         minio_client = MagicMock()
         gatekeeper_gateway = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         dataset_id = uuid.uuid4()
@@ -78,12 +86,16 @@ class Zipper_Tests(unittest.TestCase):
         self.assertEqual(4, uuid.UUID(result.name.split(".zip")[0]).version)
         MockThread.assert_called_once()
         MockThread.return_value.start.assert_called_once()
-    
+
     def test_zip_files_no_files(self):
         # given
         minio_client = MagicMock()
         gatekeeper_gateway = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = []
         dataset_id = uuid.uuid4()
@@ -105,7 +117,11 @@ class Zipper_Tests(unittest.TestCase):
         # given
         minio_client = MagicMock()
         gatekeeper_gateway = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp"
@@ -131,7 +147,11 @@ class Zipper_Tests(unittest.TestCase):
         gatekeeper_gateway = MagicMock()
         minio_client.get_object.return_value = MockResponse()
         minio_client.fput_object = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
@@ -149,7 +169,10 @@ class Zipper_Tests(unittest.TestCase):
         self.assertEqual(bucket, minio_client.fput_object.call_args[0][0])
         self.assertEqual(f"{zip_name}", minio_client.fput_object.call_args[0][1])
         gatekeeper_gateway.post_zip_callback.assert_called_once()
-        self.assertEqual(gatekeeper_gateway.post_zip_callback.call_args[0][0].status, ZipStatus.SUCCESS)
+        self.assertEqual(
+            gatekeeper_gateway.post_zip_callback.call_args[0][0].status,
+            ZipStatus.SUCCESS,
+        )
 
     def test__zip_files_exception(self):
         # given
@@ -157,7 +180,11 @@ class Zipper_Tests(unittest.TestCase):
         gatekeeper_gateway = MagicMock()
         minio_client.get_object.return_value = MockResponse()
         minio_client.fput_object.side_effect = Exception("error")
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
@@ -167,14 +194,22 @@ class Zipper_Tests(unittest.TestCase):
 
         # when
         with self.assertLogs("uvicorn", level="ERROR") as cm:
-            zipper._zip_files(process_id, dataset_id, version, bucket, file_names, zip_name)
+            zipper._zip_files(
+                process_id, dataset_id, version, bucket, file_names, zip_name
+            )
 
         # then
-        self.assertIn(f"ERROR:uvicorn:Failed to zip files for process id {process_id}:", cm.output[0])
+        self.assertIn(
+            f"ERROR:uvicorn:Failed to zip files for process id {process_id}:",
+            cm.output[0],
+        )
         minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file1")
         minio_client.get_object.assert_any_call(bucket_name=bucket, object_name="file2")
         gatekeeper_gateway.post_zip_callback.assert_called_once()
-        self.assertEqual(gatekeeper_gateway.post_zip_callback.call_args[0][0].status, ZipStatus.SUCCESS)
+        self.assertEqual(
+            gatekeeper_gateway.post_zip_callback.call_args[0][0].status,
+            ZipStatus.SUCCESS,
+        )
 
     def test__zip_files_tempfile_cleanup(self):
         # given
@@ -182,7 +217,11 @@ class Zipper_Tests(unittest.TestCase):
         gatekeeper_gateway = MagicMock()
         minio_client.get_object.return_value = MockResponse()
         minio_client.fput_object = MagicMock()
-        zipper = ZipperService(minio_client=minio_client, gatekeeper_gateway=gatekeeper_gateway, temp_dir=self.test_dir)
+        zipper = ZipperService(
+            minio_client=minio_client,
+            gatekeeper_gateway=gatekeeper_gateway,
+            temp_dir=self.test_dir,
+        )
         bucket = "bucket"
         file_names = ["file1", "file2"]
         zip_name = "tmp.zip"
@@ -196,6 +235,7 @@ class Zipper_Tests(unittest.TestCase):
         # then
         temp_files = os.listdir(self.test_dir)
         self.assertNotIn(zip_name, temp_files)
+
 
 if __name__ == "__main__":
     unittest.main()

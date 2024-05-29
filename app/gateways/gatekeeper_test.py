@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.models.zipper import ZippedResource, ZipStatus
 from app.gateways.gatekeeper import GatekeeperGateway
 import uuid
@@ -13,7 +13,7 @@ class TestGatekeeperGateway(unittest.TestCase):
             id=uuid.uuid4(),
             dataset_id=uuid.uuid4(),
             version="1.0",
-            status=ZipStatus.SUCCESS
+            status=ZipStatus.SUCCESS,
         )
 
     @patch("app.gateways.gatekeeper.requests.post")
@@ -27,7 +27,9 @@ class TestGatekeeperGateway(unittest.TestCase):
         # then
         mock_post.assert_called_once()
         expected_url = f"{self.base_url}/datasets/{self.zipped_resource.dataset_id}/versions/{self.zipped_resource.version}/files/zip/{self.zipped_resource.id}"
-        mock_post.assert_called_with(url=expected_url, data={"status": self.zipped_resource.status.name})
+        mock_post.assert_called_with(
+            url=expected_url, data={"status": self.zipped_resource.status.name}
+        )
 
     @patch("app.gateways.gatekeeper.requests.post")
     @patch("app.gateways.gatekeeper.logger")
@@ -41,7 +43,9 @@ class TestGatekeeperGateway(unittest.TestCase):
         # then
         mock_post.assert_called_once()
         expected_url = f"{self.base_url}/datasets/{self.zipped_resource.dataset_id}/versions/{self.zipped_resource.version}/files/zip/{self.zipped_resource.id}"
-        mock_post.assert_called_with(url=expected_url, data={"status": self.zipped_resource.status.name})
+        mock_post.assert_called_with(
+            url=expected_url, data={"status": self.zipped_resource.status.name}
+        )
         mock_logger.error.assert_called_once_with(
             f"POST request failed with status code 500 for process id {self.zipped_resource.id}."
         )
