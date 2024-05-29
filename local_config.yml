@@ -5,5 +5,7 @@ minio:
 
 gatekeeper:
   base_url: http://localhost:9092
+  api_key: 2836396d-7316-4db2-859b-d9047d4b3469
+  api_secret: 1234
 
 temp_dir: ../tmp_zip
