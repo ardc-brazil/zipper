@@ -3,4 +3,9 @@ minio:
   access_key: vmI02fswfhdHP1mmoASs
   secret_key: NhZqdCsEDS6gLwcYXU6B48w244H7IA0GbYOoXWaC
 
+gatekeeper:
+  base_url: http://datamap_gatekeeper:9092
+  api_key: 2836396d-7316-4db2-859b-d9047d4b3469
+  api_secret: 1234
+
 temp_dir: ../tmp_zip
