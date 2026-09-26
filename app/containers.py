@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 from minio import Minio
 import os
 
+from app.gateways.gatekeeper import GatekeeperGateway
 from app.services.zipper import ZipperService
 
 logger = logging.getLogger("uvicorn")
@@ -26,8 +27,16 @@ class Container(containers.DeclarativeContainer):
         secure=False,
     )
 
+    gatekeeper_gateway = providers.Factory(
+        GatekeeperGateway,
+        base_url=config.gatekeeper.base_url,
+        api_key=config.gatekeeper.api_key,
+        api_secret=config.gatekeeper.api_secret,
+    )
+
     zipper_service = providers.Factory(
         ZipperService,
         minio_client=minio_client,
+        gatekeeper_gateway=gatekeeper_gateway,
         temp_dir=config.temp_dir,
     )
