@@ -97,6 +97,21 @@ make docker-deployment
 
 * Backend: `https://datamap.pcs.usp.br/zipper/api/v1/docs`
 
+### Metrics
+
+Prometheus metrics are served on port `9095` at `/metrics`. The port is only exposed on the docker network, never
+published to the host; `9093` stays the API. The names follow the platform metric contract (gatekeeper RFC 005):
+
+* HTTP: `datamap_http_requests_total`, `datamap_http_request_duration_seconds`, `datamap_http_request_size_bytes`,
+  `datamap_http_response_size_bytes`, `datamap_http_requests_in_progress`. `route` is the route template; the
+  health check (`GET /api/v1/health-check/`) is not counted.
+* Zipping: `datamap_zip_jobs_total{outcome=success|failed|empty}`, `datamap_zip_jobs_in_progress`,
+  `datamap_zip_duration_seconds`, `datamap_zip_input_bytes_total`, `datamap_zip_output_bytes_total`.
+
+Uvicorn runs several workers, so the container sets `PROMETHEUS_MULTIPROC_DIR`, empties it at start, and runs
+`python -m app.metrics_server` as one separate process that sums every worker's files. Without that variable
+(local runs, tests) the metrics use the ordinary in-process registry.
+
 ### Linter and Formatting
 
 This projects uses [Ruff](https://github.com/astral-sh/ruff) to manage code style, linter and formatting.
